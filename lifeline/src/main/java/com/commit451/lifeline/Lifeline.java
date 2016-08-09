@@ -26,6 +26,7 @@ public class Lifeline {
      * @return true if in foreground
      */
     public static boolean isInForeground() {
+        checkInit();
         return mLifecycleHandler.resumed > mLifecycleHandler.paused;
     }
 
@@ -35,6 +36,7 @@ public class Lifeline {
      * @return true if the app is visible
      */
     public static boolean isVisible() {
+        checkInit();
         return mLifecycleHandler.started > mLifecycleHandler.stopped;
     }
 
@@ -44,7 +46,14 @@ public class Lifeline {
      * @return the amount of time in milliseconds. 0 if user has not left the app
      */
     public static long getTimeSpentOutsideApp() {
+        checkInit();
         return mLifecycleHandler.timeSpentOutsideApp;
+    }
+
+    private static void checkInit() {
+        if (mLifecycleHandler == null) {
+            throw new IllegalStateException("You need to first call `init()` on this class before using it");
+        }
     }
 
     /**
