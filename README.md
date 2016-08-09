@@ -4,6 +4,21 @@ Easy access to important Android lifecycle information
 [![Build Status](https://travis-ci.org/Commit451/Lifeline.svg?branch=master)](https://travis-ci.org/Commit451/Lifeline)
 [![](https://jitpack.io/v/Commit451/Lifeline.svg)](https://jitpack.io/#Commit451/Lifeline)
 
+# Basic Usage
+In your `Application` class
+```java
+Lifeline.init(this);
+```
+If you want to check to see if the app is in the foreground:
+```java
+boolean inForeground = Lifeline.isInForeground();
+```
+If you want to track time the app has been paused:
+```java
+//ideally in your onResume
+long time = Lifeline.getTimeSpentOutsideApp();
+```
+
 License
 --------
 
