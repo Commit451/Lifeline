@@ -9,15 +9,15 @@ import android.os.Bundle;
  */
 public class Lifeline {
 
-    private static MyLifecycleHandler mLifecycleHandler;
+    private static TrackedLifecycleCallbacks lifecycleHandler;
 
     /**
      * Hooks your Application up to this Lifeline
      * @param application application
      */
     public static void init(Application application) {
-        mLifecycleHandler = new MyLifecycleHandler();
-        application.registerActivityLifecycleCallbacks(mLifecycleHandler);
+        lifecycleHandler = new TrackedLifecycleCallbacks();
+        application.registerActivityLifecycleCallbacks(lifecycleHandler);
     }
 
     /**
@@ -27,7 +27,7 @@ public class Lifeline {
      */
     public static boolean isInForeground() {
         checkInit();
-        return mLifecycleHandler.resumed > mLifecycleHandler.paused;
+        return lifecycleHandler.resumed > lifecycleHandler.paused;
     }
 
     /**
@@ -37,7 +37,7 @@ public class Lifeline {
      */
     public static boolean isVisible() {
         checkInit();
-        return mLifecycleHandler.started > mLifecycleHandler.stopped;
+        return lifecycleHandler.started > lifecycleHandler.stopped;
     }
 
     /**
@@ -47,11 +47,11 @@ public class Lifeline {
      */
     public static long getTimeSpentOutsideApp() {
         checkInit();
-        return mLifecycleHandler.timeSpentOutsideApp;
+        return lifecycleHandler.timeSpentOutsideApp;
     }
 
     private static void checkInit() {
-        if (mLifecycleHandler == null) {
+        if (lifecycleHandler == null) {
             throw new IllegalStateException("You need to first call `init()` on this class before using it");
         }
     }
@@ -60,7 +60,7 @@ public class Lifeline {
      * Inspired by
      * http://stackoverflow.com/questions/3667022/checking-if-an-android-application-is-running-in-the-background/13809991#13809991
      */
-    private static class MyLifecycleHandler implements Application.ActivityLifecycleCallbacks {
+    private static class TrackedLifecycleCallbacks implements Application.ActivityLifecycleCallbacks {
 
         private int resumed;
         private int paused;
