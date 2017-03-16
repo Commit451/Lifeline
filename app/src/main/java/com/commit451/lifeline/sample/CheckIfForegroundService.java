@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.commit451.lifeline.Lifeline;
@@ -22,7 +23,7 @@ public class CheckIfForegroundService extends IntentService {
     }
 
     public CheckIfForegroundService() {
-        super("skldfjla");
+        super(CheckIfForegroundService.class.getSimpleName());
     }
 
     @Override
@@ -31,6 +32,8 @@ public class CheckIfForegroundService extends IntentService {
             @Override
             public void run() {
                 Toast.makeText(CheckIfForegroundService.this, "In foreground: " + Lifeline.isInForeground(), Toast.LENGTH_SHORT).show();
+                Log.d("TEST", "Current visible activity: " + Lifeline.getCurrentVisibleActivity());
+                Log.d("TEST", "Current created activity: " + Lifeline.getCurrentCreatedActivity());
             }
         });
         try {
