@@ -2,10 +2,14 @@ package com.commit451.lifeline;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.ComponentCallbacks2;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Keeps a pulse on your application
@@ -13,6 +17,7 @@ import java.lang.ref.WeakReference;
 public class Lifeline {
 
     private static TrackedLifecycleCallbacks lifecycleHandler;
+    private static List<OnBackgroundedListener> onBackgroundedListeners = new ArrayList<>();
 
     /**
      * Hooks your Application up to this Lifeline
@@ -21,6 +26,14 @@ public class Lifeline {
      */
     public static void init(Application application) {
         lifecycleHandler = new TrackedLifecycleCallbacks();
+        application.registerComponentCallbacks(new BackgroundComponentCallbacks2(new InternalBackgroundListener() {
+            @Override
+            public void onBackgrounded() {
+                for (OnBackgroundedListener listener : onBackgroundedListeners) {
+                    listener.onBackgrounded();
+                }
+            }
+        }));
         application.registerActivityLifecycleCallbacks(lifecycleHandler);
     }
 
@@ -96,9 +109,42 @@ public class Lifeline {
         return null;
     }
 
+    public static void register(OnBackgroundedListener listener) {
+        onBackgroundedListeners.add(listener);
+    }
+
+    public static void unregister(OnBackgroundedListener listener) {
+        onBackgroundedListeners.remove(listener);
+    }
+
     private static void checkInit() {
         if (lifecycleHandler == null) {
             throw new IllegalStateException("You need to first call `init()` on this class before using it");
+        }
+    }
+
+    private static class BackgroundComponentCallbacks2 implements ComponentCallbacks2 {
+
+        private InternalBackgroundListener listener;
+
+        public BackgroundComponentCallbacks2(InternalBackgroundListener listener) {
+            this.listener = listener;
+        }
+
+        @Override
+        public void onTrimMemory(int level) {
+            if (level == ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
+                // We're in the Background
+                listener.onBackgrounded();
+            }
+        }
+
+        @Override
+        public void onLowMemory() {
+        }
+
+        @Override
+        public void onConfigurationChanged(Configuration newConfig) {
         }
     }
 
