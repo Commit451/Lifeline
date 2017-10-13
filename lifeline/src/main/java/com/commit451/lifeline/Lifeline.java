@@ -18,6 +18,7 @@ public class Lifeline {
 
     private static TrackedLifecycleCallbacks lifecycleHandler;
     private static List<OnBackgroundedListener> onBackgroundedListeners = new ArrayList<>();
+    private static List<OnForegroundedListener> onForegroundedListeners = new ArrayList<>();
 
     /**
      * Hooks your Application up to this Lifeline
@@ -117,6 +118,14 @@ public class Lifeline {
         onBackgroundedListeners.remove(listener);
     }
 
+    public static void register(OnForegroundedListener listener) {
+        onForegroundedListeners.add(listener);
+    }
+
+    public static void unregister(OnForegroundedListener listener) {
+        onForegroundedListeners.remove(listener);
+    }
+
     private static void checkInit() {
         if (lifecycleHandler == null) {
             throw new IllegalStateException("You need to first call `init()` on this class before using it");
@@ -181,6 +190,9 @@ public class Lifeline {
             if (timeStartedPause != 0) {
                 timeSpentOutsideApp = System.currentTimeMillis() - timeStartedPause;
                 timeStartedPause = 0;
+                for (OnForegroundedListener listener : onForegroundedListeners) {
+                    listener.onForegrounded();
+                }
             }
             currentVisibleActivityRef = new WeakReference<>(activity);
         }
