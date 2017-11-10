@@ -18,6 +18,21 @@ If you want to track time the app has been paused:
 //ideally in your onResume
 val time = Lifeline.timeSpentOutsideApp()
 ```
+If you want to track when the app is backgrounded:
+```kotlin
+Lifeline.registerOnBackgroundedListener {
+    Toast.makeText(this, "On backgrounded", Toast.LENGTH_SHORT)
+            .show()
+}
+```
+If you want to track when the app is foregrounded:
+```kotlin
+Lifeline.registerOnForegroundedListener {
+    Toast.makeText(this, "On foregrounded", Toast.LENGTH_SHORT)
+            .show()
+}
+```
+Make sure to unregister these when appropriate
 
 License
 --------

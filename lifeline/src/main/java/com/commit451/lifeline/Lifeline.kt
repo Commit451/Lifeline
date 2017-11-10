@@ -7,7 +7,6 @@ import android.content.res.Configuration
 import android.os.Bundle
 
 import java.lang.ref.WeakReference
-import java.util.ArrayList
 
 /**
  * Keeps a pulse on your application
@@ -15,8 +14,23 @@ import java.util.ArrayList
 object Lifeline {
 
     private var lifecycleHandler: TrackedLifecycleCallbacks? = null
-    private val onBackgroundedListeners = ArrayList<OnBackgroundedListener>()
-    private val onForegroundedListeners = ArrayList<OnForegroundedListener>()
+    private val onBackgroundedListeners = mutableListOf<OnBackgroundedListener>()
+    private val onForegroundedListeners = mutableListOf<OnForegroundedListener>()
+
+    /**
+     * Hooks your Application up to this Lifeline
+     *
+     * @param application application
+     */
+    fun init(application: Application) {
+        lifecycleHandler = TrackedLifecycleCallbacks()
+        application.registerComponentCallbacks(BackgroundComponentCallbacks2({
+            for (listener in onBackgroundedListeners) {
+                listener.invoke()
+            }
+        }))
+        application.registerActivityLifecycleCallbacks(lifecycleHandler)
+    }
 
     /**
      * Check if the app is currently in the foreground
@@ -56,9 +70,7 @@ object Lifeline {
      */
     fun currentVisibleActivity(): Activity? {
         val lifecycleHandler = lifecycleHandler()
-        return if (lifecycleHandler.currentVisibleActivityRef != null) {
-            lifecycleHandler.currentVisibleActivityRef!!.get()
-        } else null
+        return lifecycleHandler.currentVisibleActivityRef?.get()
     }
 
     /**
@@ -69,9 +81,7 @@ object Lifeline {
      */
     fun currentCreatedActivity(): Activity? {
         val lifecycleHandler = lifecycleHandler()
-        return if (lifecycleHandler.currentCreatedActivityRef != null) {
-            lifecycleHandler.currentCreatedActivityRef!!.get()
-        } else null
+        return lifecycleHandler.currentCreatedActivityRef?.get()
     }
 
     /**
@@ -81,38 +91,34 @@ object Lifeline {
      * @return the latest started activity or null if none exists
      */
     fun currentStartedActivity(): Activity? {
-        return if (lifecycleHandler!!.currentStartedActivityRef != null) {
-            lifecycleHandler!!.currentStartedActivityRef!!.get()
-        } else null
+        val lifecycleHandler = lifecycleHandler()
+        return lifecycleHandler.currentStartedActivityRef?.get()
     }
 
     /**
-     * Hooks your Application up to this Lifeline
-     *
-     * @param application application
+     * Register for a callback when the app is backgrounded
      */
-    fun init(application: Application) {
-        lifecycleHandler = TrackedLifecycleCallbacks()
-        application.registerComponentCallbacks(BackgroundComponentCallbacks2({
-            for (listener in onBackgroundedListeners) {
-                listener.invoke()
-            }
-        }))
-        application.registerActivityLifecycleCallbacks(lifecycleHandler)
-    }
-
     fun registerOnBackgroundedListener(listener: OnBackgroundedListener) {
         onBackgroundedListeners.add(listener)
     }
 
+    /**
+     * Unregister the callback for when the app is backgrounded
+     */
     fun unregisterOnBackgroundedListener(listener: OnBackgroundedListener) {
         onBackgroundedListeners.remove(listener)
     }
 
+    /**
+     * Register for a callback when the app is foregrounded
+     */
     fun registerOnForegroundedListener(listener: OnForegroundedListener) {
         onForegroundedListeners.add(listener)
     }
 
+    /**
+     * Unregister the callback for when the app is foregrounded
+     */
     fun unregisterOnForegroundedListener(listener: OnForegroundedListener) {
         onForegroundedListeners.remove(listener)
     }
@@ -121,6 +127,9 @@ object Lifeline {
         return lifecycleHandler ?: throw IllegalStateException("You need to call init() before accessing Lifeline")
     }
 
+    /**
+     * What a great class name
+     */
     private class BackgroundComponentCallbacks2(private val onBackgrounded: () -> Unit) : ComponentCallbacks2 {
 
         override fun onTrimMemory(level: Int) {

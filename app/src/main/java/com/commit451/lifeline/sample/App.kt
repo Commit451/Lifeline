@@ -14,11 +14,11 @@ class App : Application() {
         super.onCreate()
         Lifeline.init(this)
         Lifeline.registerOnBackgroundedListener {
-            Toast.makeText(this@App, "On backgrounded", Toast.LENGTH_SHORT)
+            Toast.makeText(this, "On backgrounded", Toast.LENGTH_SHORT)
                     .show()
         }
         Lifeline.registerOnForegroundedListener {
-            Toast.makeText(this@App, "On foregrounded", Toast.LENGTH_SHORT)
+            Toast.makeText(this, "On foregrounded", Toast.LENGTH_SHORT)
                     .show()
         }
     }
