@@ -6,23 +6,23 @@ Easy access to important Android lifecycle information
 
 # Basic Usage
 In your `Application` class
-```java
-Lifeline.init(this);
+```kotlin
+Lifeline.init(this)
 ```
 If you want to check to see if the app is in the foreground:
-```java
-boolean inForeground = Lifeline.isInForeground();
+```kotlin
+val inForeground = Lifeline.isInForeground()
 ```
 If you want to track time the app has been paused:
-```java
+```kotlin
 //ideally in your onResume
-long time = Lifeline.getTimeSpentOutsideApp();
+val time = Lifeline.timeSpentOutsideApp()
 ```
 
 License
 --------
 
-    Copyright 2016 Commit 451
+    Copyright 2017 Commit 451
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
