@@ -93,27 +93,27 @@ object Lifeline {
      */
     fun init(application: Application) {
         lifecycleHandler = TrackedLifecycleCallbacks()
-        application.registerComponentCallbacks(BackgroundComponentCallbacks2(InternalBackgroundListener {
+        application.registerComponentCallbacks(BackgroundComponentCallbacks2({
             for (listener in onBackgroundedListeners) {
-                listener.onBackgrounded()
+                listener.invoke()
             }
         }))
         application.registerActivityLifecycleCallbacks(lifecycleHandler)
     }
 
-    fun register(listener: OnBackgroundedListener) {
+    fun registerOnBackgroundedListener(listener: OnBackgroundedListener) {
         onBackgroundedListeners.add(listener)
     }
 
-    fun unregister(listener: OnBackgroundedListener) {
+    fun unregisterOnBackgroundedListener(listener: OnBackgroundedListener) {
         onBackgroundedListeners.remove(listener)
     }
 
-    fun register(listener: OnForegroundedListener) {
+    fun registerOnForegroundedListener(listener: OnForegroundedListener) {
         onForegroundedListeners.add(listener)
     }
 
-    fun unregister(listener: OnForegroundedListener) {
+    fun unregisterOnForegroundedListener(listener: OnForegroundedListener) {
         onForegroundedListeners.remove(listener)
     }
 
@@ -121,12 +121,12 @@ object Lifeline {
         return lifecycleHandler ?: throw IllegalStateException("You need to call init() before accessing Lifeline")
     }
 
-    private class BackgroundComponentCallbacks2(private val listener: InternalBackgroundListener) : ComponentCallbacks2 {
+    private class BackgroundComponentCallbacks2(private val onBackgrounded: () -> Unit) : ComponentCallbacks2 {
 
         override fun onTrimMemory(level: Int) {
             if (level == ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
                 // We're in the Background
-                listener.onBackgrounded()
+                onBackgrounded.invoke()
             }
         }
 
@@ -166,7 +166,7 @@ object Lifeline {
                 timeSpentOutsideApp = System.currentTimeMillis() - timeStartedPause
                 timeStartedPause = 0
                 for (listener in onForegroundedListeners) {
-                    listener.onForegrounded()
+                    listener.invoke()
                 }
             }
             currentVisibleActivityRef = WeakReference(activity)
@@ -191,3 +191,6 @@ object Lifeline {
         }
     }
 }
+
+typealias OnBackgroundedListener = () -> Unit
+typealias OnForegroundedListener = () -> Unit
