@@ -166,7 +166,7 @@ object Lifeline {
         }
 
         override fun onActivityDestroyed(activity: Activity) {
-            currentVisibleActivityRef = null
+            currentCreatedActivityRef = null
         }
 
         override fun onActivityResumed(activity: Activity) {
